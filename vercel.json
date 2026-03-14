@@ -1,0 +1,52 @@
+{
+	"version": 2,
+	"builds": [
+		{
+			"src": "dist/index.js",
+			"use": "@vercel/node"
+		}
+	],
+	"rewrites": [
+		{
+			"source": "/api-docs/swagger-ui.css",
+			"destination": "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css"
+		},
+		{
+			"source": "/api-docs/swagger-ui-bundle.js",
+			"destination": "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js"
+		},
+		{
+			"source": "/api-docs/swagger-ui-standalone-preset.js",
+			"destination": "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js"
+		},
+		{
+			"source": "/api-docs/swagger-ui-init.js",
+			"destination": "dist/index.js"
+		},
+		{
+			"source": "/api-docs.json",
+			"destination": "dist/index.js"
+		},
+		{
+			"source": "/(.*)",
+			"destination": "dist/index.js"
+		}
+	],
+	"headers": [
+		{
+			"source": "/api/v1/(.*)",
+			"headers": [
+				{ "key": "Access-Control-Allow-Credentials", "value": "true" },
+				{
+					"key": "Access-Control-Allow-Origin",
+					"value": "https://perguruan-wr-supratman.vercel.app"
+				},
+				{ "key": "Access-Control-Allow-Methods", "value": "GET,DELETE,PATCH,POST,PUT,OPTIONS" },
+				{
+					"key": "Access-Control-Allow-Headers",
+					"value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization"
+				}
+			]
+		}
+	]
+}

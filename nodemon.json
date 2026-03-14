@@ -1,0 +1,7 @@
+{
+	"watch": ["index.ts", "./src/**/*.ts"],
+	"ext": "ts,json",
+	"delay": 500,
+	"ignore": ["./src/shared/config/swagger-output.json"],
+	"exec": "ts-node src/shared/config/swagger.ts && ts-node index.ts"
+}
