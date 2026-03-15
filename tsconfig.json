@@ -32,6 +32,6 @@
 		// --- LAIN-LAIN ---
 		"jsx": "react-jsx"
 	},
-	"include": ["src/**/*.ts", "index.ts", "src/shared/utils/mailer.ts"],
+	"include": ["src/**/*.ts", "index.ts", "src/shared/utils/mailer.ts", "../client/src/utils/imageHelper.ts"],
 	"exclude": ["node_modules", "dist", "__tests__"]
 }
