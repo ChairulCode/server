@@ -2,6 +2,24 @@ import { Request, Response } from "express";
 import { PendaftaranService } from "./pendaftaran.service";
 
 // ======================================
+// HELPER: konversi path absolut disk → URL path relatif
+// ======================================
+const toUrlPath = (diskPath: string): string => {
+	if (!diskPath) return diskPath;
+
+	let urlPath = diskPath.replace(/\\/g, "/");
+
+	const publicIndex = urlPath.indexOf("/public/");
+	if (publicIndex !== -1) {
+		urlPath = urlPath.substring(publicIndex + "/public/".length);
+	}
+
+	urlPath = urlPath.replace(/^public\//, "");
+
+	return urlPath;
+};
+
+// ======================================
 // CREATE PENDAFTARAN
 // ======================================
 export const buatPendaftaran = async (req: Request, res: Response) => {
@@ -17,10 +35,20 @@ export const buatPendaftaran = async (req: Request, res: Response) => {
 
 		const pendaftaranData = {
 			...req.body,
-			akteLahir: files.akteLahir[0].path,
-			kartuKeluarga: files.kartuKeluarga[0].path,
-			buktiTransfer: files.buktiTransfer[0].path,
+			akteLahir: toUrlPath(files.akteLahir[0].path),
+			kartuKeluarga: toUrlPath(files.kartuKeluarga[0].path),
+			buktiTransfer: toUrlPath(files.buktiTransfer[0].path),
 		};
+
+		// ← DEBUG: lihat path sebelum dan sesudah konversi
+		console.log("=== DEBUG PATH ===");
+		console.log("akteLahir   raw  :", files.akteLahir[0].path);
+		console.log("akteLahir   fixed:", pendaftaranData.akteLahir);
+		console.log("kartuKeluarga raw  :", files.kartuKeluarga[0].path);
+		console.log("kartuKeluarga fixed:", pendaftaranData.kartuKeluarga);
+		console.log("buktiTransfer raw  :", files.buktiTransfer[0].path);
+		console.log("buktiTransfer fixed:", pendaftaranData.buktiTransfer);
+		console.log("==================");
 
 		const result = await PendaftaranService.createPendaftaran(pendaftaranData);
 
@@ -181,12 +209,10 @@ export const hapusPendaftaran = async (req: Request, res: Response) => {
 };
 
 // ======================================
-// ✅ GET STATISTICS — filter per role dari JWT
+// GET STATISTICS — filter per role dari JWT
 // ======================================
 export const ambilStatistikPendaftaran = async (req: Request, res: Response) => {
 	try {
-		// ✅ JWT payload struktur: { userInfo: { role: "Kepala Sekolah SD", ... } }
-		// Sesuai auth.service.ts — jwt.sign({ userInfo: { role: user.role.nama_role } })
 		const role = (req as any).user?.userInfo?.role;
 
 		const data = await PendaftaranService.getStatistics(role);

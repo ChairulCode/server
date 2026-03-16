@@ -2,26 +2,23 @@ import { Request, Response, NextFunction } from "express";
 import galleriesService from "./galleries.service";
 
 const addPhoto = async (req: Request, res: Response, next: NextFunction) => {
-	// Middleware multer sudah berjalan sebelum ini.
-	// Jika file gagal diupload multer, req.file akan kosong.
-	// if (!req.file) {
-	// 	return res.status(400).json({ message: "File foto tidak ditemukan atau format salah." });
-	// }
-
-	// // Karena pakai diskStorage, kita ambil filename hasil generate multer
-	// const { filename, originalname } = req.file;
-	// const { alt } = req.body;
-
 	try {
-		// const newPhoto = await galleriesService.addPhoto({
-		// 	filename, // Nama file unik di disk (contoh: image-123123.jpg)
-		// 	originalName: originalname,
-		// 	alt,
-		// });
+		if (!req.file) {
+			return res.status(400).json({ message: "File foto tidak ditemukan atau format salah." });
+		}
+
+		// Setelah compressImage middleware, req.file.filename sudah berisi nama file WebP
+		const folder = req.params.folder_name || "images";
+		const finalPath = `${folder}/${req.file.filename}`;
 
 		res.status(201).json({
-			message: "Foto berhasil diunggah dan disimpan.",
-			data: req.file,
+			message: "Foto berhasil diunggah dan dikompresi.",
+			data: {
+				filename: req.file.filename,
+				path: finalPath,
+				size: req.file.size,
+				mimetype: req.file.mimetype,
+			},
 		});
 	} catch (error) {
 		next(error);
@@ -31,10 +28,7 @@ const addPhoto = async (req: Request, res: Response, next: NextFunction) => {
 const getPhotos = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const data = await galleriesService.getPhotos();
-		res.status(200).json({
-			message: "success",
-			requestedData: data,
-		});
+		res.status(200).json({ message: "success", requestedData: data });
 	} catch (error) {
 		next(error);
 	}
@@ -45,7 +39,6 @@ const getPhotoById = async (req: Request, res: Response, next: NextFunction) => 
 	try {
 		const result = await galleriesService.getPhotoById(pic_id);
 		if (!result) return res.status(404).json({ message: "Foto tidak ditemukan" });
-
 		res.status(200).json({ message: "success", data: result });
 	} catch (error) {
 		next(error);
@@ -73,10 +66,4 @@ const deletePhoto = async (req: Request, res: Response, next: NextFunction) => {
 	}
 };
 
-export default {
-	addPhoto,
-	getPhotos,
-	getPhotoById,
-	editPhoto,
-	deletePhoto,
-};
+export default { addPhoto, getPhotos, getPhotoById, editPhoto, deletePhoto };
