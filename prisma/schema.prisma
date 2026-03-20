@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
-  url        = env("DATABASE_URL")
+  url        = env("DATABASE_URL")  // ← tetap dibutuhkan
   extensions = [uuidOssp(map: "uuid-ossp")]
 }
 
@@ -38,7 +38,6 @@ enum Tingkatan {
   SMA_IPS
 }
 
-// ✅ BARU: Enum untuk kelas kelulusan SMA
 enum KelasKelulusan {
   XII_MIPA
   XII_IPS
@@ -115,23 +114,24 @@ model users {
   created_at     DateTime? @default(now()) @db.Timestamp(3)
   updated_at     DateTime? @default(now()) @updatedAt @db.Timestamp(3)
   login_terakhir DateTime? @db.Timestamp(3)
-  nilaiPenulis subject_grades[] @relation("NilaiPenulis")
-  nilaiEditor  subject_grades[] @relation("NilaiEditor")
-  role role @relation(fields: [role_id], references: [role_id], onDelete: Cascade, onUpdate: Cascade, map: "users_role_id_fkey")
-  prestasiPenulis    prestasi[]     @relation("PrestasiPenulis")
-  prestasiEditor     prestasi[]     @relation("PrestasiEditor")
-  kegiatanPenulis    kegiatan[]     @relation("KegiatanPenulis")
-  kegiatanEditor     kegiatan[]     @relation("KegiatanEditor")
-  pengumumanPenulis  pengumuman[]   @relation("PengumumanPenulis")
-  pengumumanEditor   pengumuman[]   @relation("PengumumanEditor")
-  carouselPenulis    carousel[]     @relation("CarouselPenulis")
-  carouselEditor     carousel[]     @relation("CarouselEditor")
-  SocialMediaPenulis social_media[] @relation("SocialMediaPenulis")
-  SocialMediaeditor  social_media[] @relation("SocialMediaEditor")
-  kelulusanPenulis   kelulusan[]    @relation("KelulusanPenulis")
-  kelulusanEditor    kelulusan[]    @relation("KelulusanEditor")
-  gradConfigPenulis graduation_config[] @relation("GradConfigPenulis")
-  gradConfigEditor  graduation_config[] @relation("GradConfigEditor")
+
+  role               role             @relation(fields: [role_id], references: [role_id], onDelete: Cascade, onUpdate: Cascade, map: "users_role_id_fkey")
+  nilaiPenulis       subject_grades[] @relation("NilaiPenulis")
+  nilaiEditor        subject_grades[] @relation("NilaiEditor")
+  prestasiPenulis    prestasi[]       @relation("PrestasiPenulis")
+  prestasiEditor     prestasi[]       @relation("PrestasiEditor")
+  kegiatanPenulis    kegiatan[]       @relation("KegiatanPenulis")
+  kegiatanEditor     kegiatan[]       @relation("KegiatanEditor")
+  pengumumanPenulis  pengumuman[]     @relation("PengumumanPenulis")
+  pengumumanEditor   pengumuman[]     @relation("PengumumanEditor")
+  carouselPenulis    carousel[]       @relation("CarouselPenulis")
+  carouselEditor     carousel[]       @relation("CarouselEditor")
+  SocialMediaPenulis social_media[]   @relation("SocialMediaPenulis")
+  SocialMediaeditor  social_media[]   @relation("SocialMediaEditor")
+  kelulusanPenulis   kelulusan[]      @relation("KelulusanPenulis")
+  kelulusanEditor    kelulusan[]      @relation("KelulusanEditor")
+  gradConfigPenulis  graduation_config[] @relation("GradConfigPenulis")
+  gradConfigEditor   graduation_config[] @relation("GradConfigEditor")
 
   @@index([role_id], map: "users_role_id_index")
 }
@@ -140,15 +140,16 @@ model jenjang {
   jenjang_id   String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   nama_jenjang String @unique(map: "jenjang_nama_jenjang_unique") @db.VarChar(50)
   kode_jenjang String @unique(map: "jenjang_kode_jenjang_unique") @db.VarChar(10)
-  subjectGrades subject_grades[]
-  Kelulusan     kelulusan[]
+
+  subjectGrades     subject_grades[]
+  Kelulusan         kelulusan[]
   graduationConfigs graduation_config[]
-  pengumuman         pengumuman[]
-  prestasi           prestasi[]
-  kegiatan           kegiatan[]
-  carousels          carousel[]
-  prestasiJenjangs   prestasi_jenjang[]
-  kegiatanJenjangs   kegiatan_jenjang[]
+  pengumuman        pengumuman[]
+  prestasi          prestasi[]
+  kegiatan          kegiatan[]
+  carousels         carousel[]
+  prestasiJenjangs  prestasi_jenjang[]
+  kegiatanJenjangs  kegiatan_jenjang[]
   pengumumanJenjangs pengumuman_jenjang[]
 }
 
@@ -163,16 +164,14 @@ model prestasi {
   is_featured       Boolean?  @default(true)
   created_at        DateTime? @default(now()) @db.Timestamp(3)
   updated_at        DateTime  @default(now()) @updatedAt @db.Timestamp(3)
+  penulis_user_id   String    @db.Uuid
+  editor_user_id    String?   @db.Uuid
+  jenjangJenjang_id String?   @db.Uuid
 
   jenjang_relasi prestasi_jenjang[]
-
-  penulis_user_id   String   @db.Uuid
-  editor_user_id    String?  @db.Uuid
-  jenjangJenjang_id String?  @db.Uuid
-
-  penulis users    @relation("PrestasiPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade, map: "prestasi_penulis_fkey")
-  editor  users?   @relation("PrestasiEditor", fields: [editor_user_id], references: [user_id], onDelete: SetNull, onUpdate: Cascade, map: "prestasi_editor_fkey")
-  jenjang jenjang? @relation(fields: [jenjangJenjang_id], references: [jenjang_id])
+  penulis        users    @relation("PrestasiPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade, map: "prestasi_penulis_fkey")
+  editor         users?   @relation("PrestasiEditor", fields: [editor_user_id], references: [user_id], onDelete: SetNull, onUpdate: Cascade, map: "prestasi_editor_fkey")
+  jenjang        jenjang? @relation(fields: [jenjangJenjang_id], references: [jenjang_id])
 
   @@index([penulis_user_id], map: "prestasi_penulis_user_id_index")
   @@index([editor_user_id], map: "prestasi_editor_user_id_index")
@@ -189,16 +188,14 @@ model kegiatan {
   is_featured       Boolean?  @default(true)
   created_at        DateTime? @default(now()) @db.Timestamp(3)
   updated_at        DateTime  @default(now()) @updatedAt @db.Timestamp(3)
+  penulis_user_id   String    @db.Uuid
+  editor_user_id    String?   @db.Uuid
+  jenjangJenjang_id String?   @db.Uuid
 
   jenjang_relasi kegiatan_jenjang[]
-
-  penulis_user_id   String   @db.Uuid
-  editor_user_id    String?  @db.Uuid
-  jenjangJenjang_id String?  @db.Uuid
-
-  penulis users    @relation("KegiatanPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade, map: "kegiatan_penulis_fkey")
-  editor  users?   @relation("KegiatanEditor", fields: [editor_user_id], references: [user_id], onDelete: SetNull, onUpdate: Cascade, map: "kegiatan_editor_fkey")
-  jenjang jenjang? @relation(fields: [jenjangJenjang_id], references: [jenjang_id])
+  penulis        users    @relation("KegiatanPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade, map: "kegiatan_penulis_fkey")
+  editor         users?   @relation("KegiatanEditor", fields: [editor_user_id], references: [user_id], onDelete: SetNull, onUpdate: Cascade, map: "kegiatan_editor_fkey")
+  jenjang        jenjang? @relation(fields: [jenjangJenjang_id], references: [jenjang_id])
 
   @@index([penulis_user_id], map: "kegiatan_penulis_user_id_index")
   @@index([editor_user_id], map: "kegiatan_editor_user_id_index")
@@ -214,17 +211,15 @@ model pengumuman {
   is_featured       Boolean?  @default(true)
   created_at        DateTime? @default(now()) @db.Timestamp(3)
   updated_at        DateTime  @default(now()) @updatedAt @db.Timestamp(3)
+  jenjang_id        String?   @db.Uuid
+  penulis_user_id   String    @db.Uuid
+  editor_user_id    String?   @db.Uuid
+  jenjangJenjang_id String?   @db.Uuid
 
   jenjang_relasi pengumuman_jenjang[]
-
-  jenjang_id        String?  @db.Uuid
-  penulis_user_id   String   @db.Uuid
-  editor_user_id    String?  @db.Uuid
-  jenjangJenjang_id String?  @db.Uuid
-
-  penulis users    @relation("PengumumanPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade, map: "pengumuman_penulis_fkey")
-  editor  users?   @relation("PengumumanEditor", fields: [editor_user_id], references: [user_id], onDelete: SetNull, onUpdate: Cascade, map: "pengumuman_editor_fkey")
-  jenjang jenjang? @relation(fields: [jenjangJenjang_id], references: [jenjang_id])
+  penulis        users    @relation("PengumumanPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade, map: "pengumuman_penulis_fkey")
+  editor         users?   @relation("PengumumanEditor", fields: [editor_user_id], references: [user_id], onDelete: SetNull, onUpdate: Cascade, map: "pengumuman_editor_fkey")
+  jenjang        jenjang? @relation(fields: [jenjangJenjang_id], references: [jenjang_id])
 
   @@index([penulis_user_id], map: "pengumuman_penulis_user_id_index")
   @@index([editor_user_id], map: "pengumuman_editor_user_id_index")
@@ -291,10 +286,9 @@ model carousel {
   is_featured       Boolean?  @default(true)
   created_at        DateTime? @default(now()) @db.Timestamp(3)
   updated_at        DateTime  @default(now()) @updatedAt @db.Timestamp(3)
-
-  jenjang_id      String? @db.Uuid
-  penulis_user_id String  @db.Uuid
-  editor_user_id  String? @db.Uuid
+  jenjang_id        String?   @db.Uuid
+  penulis_user_id   String    @db.Uuid
+  editor_user_id    String?   @db.Uuid
 
   jenjang jenjang? @relation(fields: [jenjang_id], references: [jenjang_id], onDelete: SetNull, onUpdate: Cascade, map: "carousel_jenjang_id_fkey")
   penulis users    @relation("CarouselPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade, map: "carousel_penulis_fkey")
@@ -382,9 +376,8 @@ model social_media {
   urutan          Int?
   created_at      DateTime?           @default(now()) @db.Timestamp(3)
   updated_at      DateTime?           @default(now()) @updatedAt @db.Timestamp(3)
-
-  penulis_user_id String  @db.Uuid
-  editor_user_id  String? @db.Uuid
+  penulis_user_id String              @db.Uuid
+  editor_user_id  String?             @db.Uuid
 
   penulis users  @relation("SocialMediaPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
   editor  users? @relation("SocialMediaEditor", fields: [editor_user_id], references: [user_id], onDelete: SetNull, onUpdate: Cascade)
@@ -396,44 +389,29 @@ model social_media {
 }
 
 // ----------------------------------------------------
-// KELULUSAN (✅ UPDATED)
+// KELULUSAN
 // ----------------------------------------------------
 
 model kelulusan {
-  kelulusan_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-
-  // Data Siswa
-  nomor_siswa  String    @unique @db.VarChar(50)
-  nama_siswa   String    @db.VarChar(255)
-  tempat_lahir String?   @db.VarChar(100)
-  tanggal_lahir DateTime? @db.Date
-
-  // ✅ BARU: Kelas XII MIPA atau XII IPS
-  kelas KelasKelulusan
-
-  // Status & Detail
-  status_lulus    Boolean @default(false)
+  kelulusan_id    String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nomor_siswa     String         @unique @db.VarChar(50)
+  nama_siswa      String         @db.VarChar(255)
+  tempat_lahir    String?        @db.VarChar(100)
+  tanggal_lahir   DateTime?      @db.Date
+  kelas           KelasKelulusan
+  status_lulus    Boolean        @default(false)
   nilai_rata_rata Float?
-  keterangan      String? @db.Text
+  keterangan      String?        @db.Text
+  tanggal_akses   DateTime?      @db.Timestamp(3)
+  path_skhun      String?        @db.VarChar(255)
+  is_active       Boolean?       @default(true)
+  tahun_ajaran    String         @db.VarChar(20)
+  created_at      DateTime?      @default(now()) @db.Timestamp(3)
+  updated_at      DateTime       @default(now()) @updatedAt @db.Timestamp(3)
+  jenjang_id      String         @db.Uuid
+  penulis_user_id String         @db.Uuid
+  editor_user_id  String?        @db.Uuid
 
-  // ✅ BARU: Tanggal & jam mulai bisa diakses publik
-  tanggal_akses DateTime? @db.Timestamp(3)
-
-  // File Pendukung
-  path_skhun String? @db.VarChar(255)
-
-  // Metadata & Audit
-  is_active    Boolean?  @default(true)
-  tahun_ajaran String    @db.VarChar(20)
-  created_at   DateTime? @default(now()) @db.Timestamp(3)
-  updated_at   DateTime  @default(now()) @updatedAt @db.Timestamp(3)
-
-  // Foreign Keys
-  jenjang_id      String  @db.Uuid
-  penulis_user_id String  @db.Uuid
-  editor_user_id  String? @db.Uuid
-
-  // Relasi
   jenjang jenjang @relation(fields: [jenjang_id], references: [jenjang_id], onDelete: Cascade)
   penulis users   @relation("KelulusanPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade)
   editor  users?  @relation("KelulusanEditor", fields: [editor_user_id], references: [user_id], onDelete: SetNull)
@@ -450,27 +428,23 @@ model kelulusan {
 // ----------------------------------------------------
 
 model subject_grades {
-  grade_id     String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  tahun_ajaran String @db.VarChar(20)
-  semester     String @db.VarChar(10)
-  status       String @default("Draft") @db.VarChar(20)
-  nama_siswa   String @db.VarChar(255)
-  nilai_json   Json
-  catatan      String? @db.Text
+  grade_id        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tahun_ajaran    String    @db.VarChar(20)
+  semester        String    @db.VarChar(10)
+  status          String    @default("Draft") @db.VarChar(20)
+  nama_siswa      String    @db.VarChar(255)
+  nilai_json      Json
+  catatan         String?   @db.Text
+  student_user_id String    @db.VarChar(255)
+  jenjang_id      String    @db.Uuid
+  created_at      DateTime? @default(now()) @db.Timestamp(3)
+  updated_at      DateTime  @default(now()) @updatedAt @db.Timestamp(3)
+  penulis_user_id String    @db.Uuid
+  editor_user_id  String?   @db.Uuid
 
-  student_user_id String @db.VarChar(255)
-
-  jenjang_id String  @db.Uuid
-  jenjang    jenjang @relation(fields: [jenjang_id], references: [jenjang_id], onDelete: Cascade)
-
-  created_at DateTime? @default(now()) @db.Timestamp(3)
-  updated_at DateTime  @default(now()) @updatedAt @db.Timestamp(3)
-
-  penulis_user_id String  @db.Uuid
-  editor_user_id  String? @db.Uuid
-
-  penulis users  @relation("NilaiPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade)
-  editor  users? @relation("NilaiEditor", fields: [editor_user_id], references: [user_id], onDelete: SetNull)
+  jenjang jenjang @relation(fields: [jenjang_id], references: [jenjang_id], onDelete: Cascade)
+  penulis users   @relation("NilaiPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade)
+  editor  users?  @relation("NilaiEditor", fields: [editor_user_id], references: [user_id], onDelete: SetNull)
 
   @@index([student_user_id])
   @@index([jenjang_id])
@@ -483,64 +457,52 @@ model subject_grades {
 // ----------------------------------------------------
 
 model Pendaftaran {
-  id String @id @default(uuid())
-
-  // Data Siswa
-  namaSiswa          String
-  kelas              String
-  tempatLahir        String
-  tanggalLahir       DateTime
-  jenisKelamin       String
-  belajarAgama       String
-  golonganDarah      String?
-  anakKe             Int
-  jumlahSaudara      Int
-  status             String
-  alamatSiswa        String
-  telpSiswa          String
-  tinggalBersama     String
-  lulusanDariSekolah String?
-  nisn               String?
-
-  // Ijazah (optional untuk SMP/SMA)
-  nomorIjazah       String?
-  tglIjazah         DateTime?
-  tahunIjazah       Int?
-  jumlahNilaiUS     Float?
+  id                  String    @id @default(uuid())
+  namaSiswa           String
+  kelas               String
+  tempatLahir         String
+  tanggalLahir        DateTime
+  jenisKelamin        String
+  belajarAgama        String
+  golonganDarah       String?
+  anakKe              Int
+  jumlahSaudara       Int
+  status              String
+  alamatSiswa         String
+  telpSiswa           String
+  tinggalBersama      String
+  lulusanDariSekolah  String?
+  nisn                String?
+  nomorIjazah         String?
+  tglIjazah           DateTime?
+  tahunIjazah         Int?
+  jumlahNilaiUS       Float?
   pindahanDariSekolah String?
-  alamatSekolahAsal String?
-  emailOrangtua     String
-
-  // Data Ayah
-  namaAyah         String
-  tempatLahirAyah  String
-  tanggalLahirAyah DateTime
-  agamaAyah        String
-  pendidikanAyah   String
-  alamatAyah       String
-  pekerjaanAyah    String
-  telpAyah         String
-
-  // Data Ibu
-  namaIbu         String
-  tempatLahirIbu  String
-  tanggalLahirIbu DateTime
-  agamaIbu        String
-  pendidikanIbu   String
-  alamatIbu       String
-  pekerjaanIbu    String
-  telpIbu         String
-
-  // File paths
-  akteLahirUrl     String
-  kartuKeluargaUrl String
-  buktiTransferUrl String
-
-  // Metadata
-  statusPendaftaran String   @default("pending")
-  noPendaftaran     String   @unique
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  alamatSekolahAsal   String?
+  emailOrangtua       String
+  namaAyah            String
+  tempatLahirAyah     String
+  tanggalLahirAyah    DateTime
+  agamaAyah           String
+  pendidikanAyah      String
+  alamatAyah          String
+  pekerjaanAyah       String
+  telpAyah            String
+  namaIbu             String
+  tempatLahirIbu      String
+  tanggalLahirIbu     DateTime
+  agamaIbu            String
+  pendidikanIbu       String
+  alamatIbu           String
+  pekerjaanIbu        String
+  telpIbu             String
+  akteLahirUrl        String
+  kartuKeluargaUrl    String
+  buktiTransferUrl    String
+  statusPendaftaran   String   @default("pending")
+  noPendaftaran       String   @unique
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   @@map("pendaftaran")
 }
@@ -564,30 +526,27 @@ model MataPelajaran {
   @@index([isActive])
   @@map("mata_pelajaran")
 }
-// Tambahkan ke schema.prisma yang sudah ada
+
+// ----------------------------------------------------
+// GRADUATION CONFIG
+// ----------------------------------------------------
 
 model graduation_config {
-  config_id     String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  jenjang_id    String         @db.Uuid
-  tahun_ajaran  String         @db.VarChar(20)
-  kelas         KelasKelulusan // XII_MIPA atau XII_IPS
-
-  // Kapan pengumuman mulai bisa diakses publik
-  tanggal_akses DateTime       @db.Timestamp(3)
-
-  // Pesan yang tampil di banner halaman client
-  pesan_banner  String?        @db.Text
-
-  is_active     Boolean        @default(true)
-  created_at    DateTime?      @default(now()) @db.Timestamp(3)
-  updated_at    DateTime       @default(now()) @updatedAt @db.Timestamp(3)
-
-  penulis_user_id String        @db.Uuid
-  editor_user_id  String?       @db.Uuid
+  config_id       String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  jenjang_id      String         @db.Uuid
+  tahun_ajaran    String         @db.VarChar(20)
+  kelas           KelasKelulusan
+  tanggal_akses   DateTime       @db.Timestamp(3)
+  pesan_banner    String?        @db.Text
+  is_active       Boolean        @default(true)
+  created_at      DateTime?      @default(now()) @db.Timestamp(3)
+  updated_at      DateTime       @default(now()) @updatedAt @db.Timestamp(3)
+  penulis_user_id String         @db.Uuid
+  editor_user_id  String?        @db.Uuid
 
   jenjang jenjang @relation(fields: [jenjang_id], references: [jenjang_id], onDelete: Cascade)
   penulis users   @relation("GradConfigPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade)
-  editor  users?  @relation("GradConfigEditor",  fields: [editor_user_id],  references: [user_id], onDelete: SetNull)
+  editor  users?  @relation("GradConfigEditor", fields: [editor_user_id], references: [user_id], onDelete: SetNull)
 
   @@unique([jenjang_id, tahun_ajaran, kelas], map: "unique_grad_config")
   @@index([jenjang_id])
@@ -596,3 +555,31 @@ model graduation_config {
   @@map("graduation_config")
 }
 
+// ----------------------------------------------------
+// FASILITAS
+// ----------------------------------------------------
+
+model fasilitas {
+  fasilitas_id String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nama         String   @db.VarChar(255)
+  deskripsi    String?  @db.Text
+  icon         String?  @db.VarChar(100)
+  urutan       Int?
+  is_active    Boolean? @default(true)
+  created_at   DateTime? @default(now()) @db.Timestamp(3)
+  updated_at   DateTime  @default(now()) @updatedAt @db.Timestamp(3)
+
+  gambar fasilitas_gambar[]
+}
+
+model fasilitas_gambar {
+  gambar_id    String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  fasilitas_id String    @db.Uuid
+  path_gambar  String    @db.VarChar(255)
+  urutan       Int       @default(1)
+  created_at   DateTime? @default(now()) @db.Timestamp(3)
+
+fasilitas fasilitas @relation(fields: [fasilitas_id], references: [fasilitas_id], onDelete: Cascade, map: "fasilitas_gambar_fasilitas_id_fkey")
+
+  @@index([fasilitas_id], map: "fasilitas_gambar_fasilitas_id_index")
+}

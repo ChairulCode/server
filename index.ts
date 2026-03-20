@@ -9,7 +9,7 @@ config();
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-// MIDDLEWARES
+// ─── MIDDLEWARES ──────────────────────────────────────────────────────────────
 import authenticateJWT from "./src/shared/middlewares/jwtVerification";
 import session_middleware from "./src/shared/middlewares/session_server";
 
@@ -32,7 +32,7 @@ app.use(
 	})
 );
 
-// ROUTES
+// ─── ROUTES — import ──────────────────────────────────────────────────────────
 import swaggerDocument from "./src/shared/config/swagger-output.json";
 import beritaRoutes from "./src/core/achievements/achievements.route";
 import kegiatanRoutes from "./src/core/activities/activities.route";
@@ -49,8 +49,10 @@ import GraduationRoute from "./src/core/graduationannouncement/graduation.route"
 import SubjectGradesRoute from "./src/core/subjectgrades/subjectgrades.routes";
 import pendaftaranRoutes from "./src/core/pendaftaran/pendaftaran.route";
 import mataPelajaranRoutes from "./src/core/matapelajaran/matapelajaran.route";
+import fasilitasRoutes from "./src/core/facilities/facilities.route";
 import prisma from "./src/shared/config/db";
 
+// ─── ROUTES — register ────────────────────────────────────────────────────────
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/v1/prestasi", beritaRoutes);
 app.use("/api/v1/kegiatan", kegiatanRoutes);
@@ -67,16 +69,18 @@ app.use("/api/v1/graduation", GraduationRoute);
 app.use("/api/v1/subject-grades", SubjectGradesRoute);
 app.use("/api/v1/pendaftaran", pendaftaranRoutes);
 app.use("/api/v1/mata-pelajaran", mataPelajaranRoutes);
+app.use("/api/v1/fasilitas", fasilitasRoutes); // ✅ fasilitas
 
-// STATIC
+// ─── STATIC FILES ─────────────────────────────────────────────────────────────
 app.use("/activities", express.static(path.join(__dirname, "./public/activities")));
 app.use("/announcements", express.static(path.join(__dirname, "./public/announcements")));
 app.use("/achievements", express.static(path.join(__dirname, "./public/achievements")));
 app.use("/carousels", express.static(path.join(__dirname, "./public/carousels")));
 app.use("/pendaftaran", express.static(path.join(__dirname, "./public/pendaftaran")));
 app.use("/graduation", express.static(path.join(__dirname, "./public/graduation")));
+app.use("/facilities", express.static(path.join(__dirname, "./public/facilities"))); // ✅ fasilitas
 
-// ERROR HANDLER
+// ─── ERROR HANDLER ────────────────────────────────────────────────────────────
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 	console.error(err.stack);
 	res.status(500).json({
@@ -85,11 +89,11 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 	});
 });
 
-app.get("/", async (req: Request, res: Response) => {
+app.get("/", async (_req: Request, res: Response) => {
 	res.json("Server is running!");
 });
 
-// SERVERLESS
+// ─── START SERVER ─────────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== "production") {
 	app.listen(PORT, () => {
 		console.log(`Server is running on http://localhost:${PORT}`);
