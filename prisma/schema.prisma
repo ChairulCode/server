@@ -583,3 +583,29 @@ fasilitas fasilitas @relation(fields: [fasilitas_id], references: [fasilitas_id]
 
   @@index([fasilitas_id], map: "fasilitas_gambar_fasilitas_id_index")
 }
+model ekstrakurikuler {
+  ekskul_id  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nama       String    @db.VarChar(255)
+  deskripsi  String?   @db.Text
+  kategori   String?   @db.VarChar(100)
+  hari_latihan String? @db.VarChar(255)
+  icon       String?   @db.VarChar(100)
+  urutan     Int?
+  is_active  Boolean?  @default(true)
+  created_at DateTime? @default(now()) @db.Timestamp(3)
+  updated_at DateTime  @default(now()) @updatedAt @db.Timestamp(3)
+
+  gambar ekskul_gambar[]
+}
+
+model ekskul_gambar {
+  gambar_id  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  ekskul_id  String    @db.Uuid
+  path_gambar String   @db.VarChar(255)
+  urutan     Int       @default(1)
+  created_at DateTime? @default(now()) @db.Timestamp(3)
+
+  ekstrakurikuler ekstrakurikuler @relation(fields: [ekskul_id], references: [ekskul_id], onDelete: Cascade)
+
+  @@index([ekskul_id])
+}

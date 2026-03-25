@@ -50,6 +50,7 @@ import SubjectGradesRoute from "./src/core/subjectgrades/subjectgrades.routes";
 import pendaftaranRoutes from "./src/core/pendaftaran/pendaftaran.route";
 import mataPelajaranRoutes from "./src/core/matapelajaran/matapelajaran.route";
 import fasilitasRoutes from "./src/core/facilities/facilities.route";
+import ekskulRoutes from "./src/core/ekstrakurikuler/ekskul.route";
 import prisma from "./src/shared/config/db";
 
 // ─── ROUTES — register ────────────────────────────────────────────────────────
@@ -70,6 +71,7 @@ app.use("/api/v1/subject-grades", SubjectGradesRoute);
 app.use("/api/v1/pendaftaran", pendaftaranRoutes);
 app.use("/api/v1/mata-pelajaran", mataPelajaranRoutes);
 app.use("/api/v1/fasilitas", fasilitasRoutes); // ✅ fasilitas
+app.use("/api/v1/ekstrakurikuler", ekskulRoutes);
 
 // ─── STATIC FILES ─────────────────────────────────────────────────────────────
 app.use("/activities", express.static(path.join(__dirname, "./public/activities")));
@@ -78,7 +80,8 @@ app.use("/achievements", express.static(path.join(__dirname, "./public/achieveme
 app.use("/carousels", express.static(path.join(__dirname, "./public/carousels")));
 app.use("/pendaftaran", express.static(path.join(__dirname, "./public/pendaftaran")));
 app.use("/graduation", express.static(path.join(__dirname, "./public/graduation")));
-app.use("/facilities", express.static(path.join(__dirname, "./public/facilities"))); // ✅ fasilitas
+app.use("/facilities", express.static(path.join(__dirname, "./public/facilities")));
+app.use("/ekstrakurikuler", express.static(path.join(__dirname, "./public/ekstrakurikuler")));
 
 // ─── ERROR HANDLER ────────────────────────────────────────────────────────────
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
