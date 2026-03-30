@@ -50,6 +50,23 @@ export const ambilSemuaKelulusan = async (req: Request, res: Response) => {
 	}
 };
 
+// ── Ambil daftar tahun ajaran yang tersedia (publik) ──────────
+export const ambilTahunAjaranController = async (req: Request, res: Response) => {
+	try {
+		const data = await graduationService.ambilTahunAjaranTersedia();
+		return res.status(200).json({
+			success: true,
+			message: "Daftar tahun ajaran berhasil diambil.",
+			data,
+		});
+	} catch (err: any) {
+		return res.status(500).json({
+			success: false,
+			message: err.message ?? "Server Error",
+		});
+	}
+};
+
 // ── Cek status lulus (endpoint lama) ─────────────────────────
 export const cekStatusLulus = async (req: Request, res: Response) => {
 	const { nomor_siswa } = req.params;
@@ -71,7 +88,9 @@ export const cekStatusLulus = async (req: Request, res: Response) => {
 	}
 };
 
-// ── BARU: Cek kelulusan siswa (nomor_siswa + tanggal_lahir) ───
+// ── Cek kelulusan siswa (nomor_siswa + tanggal_lahir) ─────────
+// tahun_ajaran sekarang OPSIONAL — jika tidak dikirim, sistem otomatis
+// mencari data paling baru milik siswa tersebut.
 export const cekKelulusanSiswaController = async (req: Request, res: Response) => {
 	try {
 		const { nomor_siswa, tanggal_lahir, tahun_ajaran } = req.body;
@@ -79,10 +98,9 @@ export const cekKelulusanSiswaController = async (req: Request, res: Response) =
 		const result = await graduationService.cekKelulusanSiswa(
 			nomor_siswa,
 			tanggal_lahir,
-			tahun_ajaran
+			tahun_ajaran // bisa undefined/kosong
 		);
 
-		// Tidak ditemukan ATAU tanggal lahir tidak cocok → respons 404 yang sama (tidak bocorkan)
 		if (!result.found) {
 			return res.status(404).json({
 				success: false,
@@ -90,7 +108,6 @@ export const cekKelulusanSiswaController = async (req: Request, res: Response) =
 			});
 		}
 
-		// Ditemukan tapi belum waktunya
 		if (!result.aksesValid) {
 			return res.status(403).json({
 				success: false,

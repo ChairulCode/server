@@ -11,7 +11,9 @@ export const validasiCekStatusLulus = [
 	checkValidationResult,
 ];
 
-// ── BARU: Validasi cek kelulusan siswa (nomor_siswa + tgl lahir) ─
+// ── Validasi cek kelulusan siswa (nomor_siswa + tgl lahir) ────
+// tahun_ajaran sekarang OPSIONAL — jika tidak dikirim, server otomatis
+// mencari data terbaru milik siswa tersebut.
 export const validasiCekSiswa = [
 	body("nomor_siswa")
 		.notEmpty()
@@ -28,9 +30,9 @@ export const validasiCekSiswa = [
 		.isLength({ min: 8, max: 8 })
 		.withMessage("Format tanggal lahir harus YYYYMMDD (8 digit)."),
 
+	// OPSIONAL — jika dikirim, validasi format YYYY/YYYY
 	body("tahun_ajaran")
-		.notEmpty()
-		.withMessage("Tahun ajaran wajib diisi.")
+		.optional({ nullable: true, checkFalsy: true })
 		.matches(/^\d{4}\/\d{4}$/)
 		.withMessage("Format tahun ajaran: YYYY/YYYY."),
 
@@ -43,7 +45,7 @@ export const validasiDetailKelulusan = [
 	checkValidationResult,
 ];
 
-// ── Validasi buat kelulusan (EDIT: tambah kelas & tanggal_lahir) ─
+// ── Validasi buat kelulusan ───────────────────────────────────
 export const validasiBuatKelulusan = [
 	body("nomor_siswa")
 		.notEmpty()
@@ -58,14 +60,12 @@ export const validasiBuatKelulusan = [
 		.isString()
 		.isLength({ min: 2, max: 255 }),
 
-	// BARU: kelas wajib saat buat data
 	body("kelas")
 		.notEmpty()
 		.withMessage("Kelas wajib diisi.")
 		.isIn(["XII_MIPA", "XII_IPS"])
 		.withMessage("Kelas harus XII_MIPA atau XII_IPS."),
 
-	// BARU: tanggal lahir wajib saat buat data (format ISO dari input date HTML)
 	body("tanggal_lahir")
 		.notEmpty()
 		.withMessage("Tanggal lahir siswa wajib diisi.")
@@ -95,7 +95,7 @@ export const validasiBuatKelulusan = [
 	checkValidationResult,
 ];
 
-// ── Validasi edit kelulusan (EDIT: tambah kelas & tanggal_lahir) ─
+// ── Validasi edit kelulusan ───────────────────────────────────
 export const validasiEditKelulusan = [
 	param("kelulusan_id").isUUID(4).withMessage("ID Kelulusan harus UUID v4 yang valid."),
 
@@ -103,13 +103,11 @@ export const validasiEditKelulusan = [
 
 	body("nama_siswa").optional({ checkFalsy: true }).isString(),
 
-	// BARU
 	body("kelas")
 		.optional()
 		.isIn(["XII_MIPA", "XII_IPS"])
 		.withMessage("Kelas harus XII_MIPA atau XII_IPS."),
 
-	// BARU
 	body("tanggal_lahir").optional().isISO8601().withMessage("Format tanggal lahir tidak valid."),
 
 	body("status_lulus").optional().isBoolean(),
@@ -126,7 +124,7 @@ export const validasiEditKelulusan = [
 	checkValidationResult,
 ];
 
-// ── Validasi hapus (tetap sama) ───────────────────────────────
+// ── Validasi hapus ────────────────────────────────────────────
 export const validasiHapusKelulusan = [
 	param("kelulusan_id").isUUID(4).withMessage("ID Kelulusan tidak valid."),
 	checkValidationResult,

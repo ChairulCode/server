@@ -56,6 +56,17 @@ const ambilSemuaKelulusan = async (
 	};
 };
 
+// ── Ambil daftar tahun ajaran yang tersedia (publik) ──────────
+// Digunakan client untuk menampilkan pill "T.P. XXXX/XXXX" secara dinamis
+const ambilTahunAjaranTersedia = async () => {
+	const rows = await db.kelulusan.findMany({
+		select: { tahun_ajaran: true },
+		distinct: ["tahun_ajaran"],
+		orderBy: { tahun_ajaran: "desc" },
+	});
+	return rows.map((r) => r.tahun_ajaran);
+};
+
 // ── Cek status lulus (endpoint lama, publik) ──────────────────
 const cekStatusLulus = async (nomor_siswa: string) => {
 	return await db.kelulusan.findFirst({
@@ -64,23 +75,37 @@ const cekStatusLulus = async (nomor_siswa: string) => {
 	});
 };
 
-// ── BARU: Cek kelulusan siswa dengan verifikasi tanggal lahir ─
+// ── Cek kelulusan siswa dengan verifikasi tanggal lahir ───────
+// tahun_ajaran sekarang OPSIONAL:
+//   - Jika dikirim → cari by nomor_siswa + tahun_ajaran
+//   - Jika tidak dikirim (atau kosong) → cari by nomor_siswa saja,
+//     ambil data dengan tahun_ajaran terbaru
 const cekKelulusanSiswa = async (
 	nomor_siswa: string,
-	tanggal_lahir: string, // format: YYYYMMDD
-	tahun_ajaran: string
+	tanggal_lahir: string,
+	tahun_ajaran?: string
 ) => {
 	// Parse YYYYMMDD → Date
 	const y = parseInt(tanggal_lahir.substring(0, 4));
-	const m = parseInt(tanggal_lahir.substring(4, 6)) - 1; // bulan 0-based
+	const m = parseInt(tanggal_lahir.substring(4, 6)) - 1;
 	const d = parseInt(tanggal_lahir.substring(6, 8));
 	const tglInput = new Date(y, m, d);
 
 	// Cari data kelulusan
-	const result = await db.kelulusan.findFirst({
-		where: { nomor_siswa, tahun_ajaran },
-		include: { jenjang: true },
-	});
+	let result;
+	if (tahun_ajaran && tahun_ajaran.trim() !== "") {
+		result = await db.kelulusan.findFirst({
+			where: { nomor_siswa, tahun_ajaran },
+			include: { jenjang: true },
+		});
+	} else {
+		// Ambil data paling baru berdasarkan tahun_ajaran desc
+		result = await db.kelulusan.findFirst({
+			where: { nomor_siswa },
+			include: { jenjang: true },
+			orderBy: { tahun_ajaran: "desc" },
+		});
+	}
 
 	// Tidak ditemukan
 	if (!result) return { found: false };
@@ -95,14 +120,13 @@ const cekKelulusanSiswa = async (
 		tglDb.getMonth() === tglInput.getMonth() &&
 		tglDb.getDate() === tglInput.getDate();
 
-	// Tanggal lahir tidak cocok → respons sama seperti tidak ditemukan (jangan bocorkan info)
 	if (!cocok) return { found: false };
 
-	// Cek konfigurasi tanggal akses untuk kelas ini
+	// Cek konfigurasi tanggal akses
 	const config = await db.graduation_config.findFirst({
 		where: {
 			kelas: result.kelas,
-			tahun_ajaran,
+			tahun_ajaran: result.tahun_ajaran,
 			is_active: true,
 		},
 	});
@@ -142,8 +166,9 @@ const hapusKelulusan = async (kelulusan_id: string) => {
 export default {
 	buatKelulusan,
 	ambilSemuaKelulusan,
+	ambilTahunAjaranTersedia,
 	cekStatusLulus,
-	cekKelulusanSiswa, // ← BARU
+	cekKelulusanSiswa,
 	editKelulusan,
 	hapusKelulusan,
 };
