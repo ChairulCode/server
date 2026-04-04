@@ -17,7 +17,12 @@ export const ambilSemuaPrestasi = async (req: Request, res: Response) => {
 	const { page = "1", limit = "20" } = req.query;
 
 	try {
-		const result = await prestasiService.ambilSemuaPrestasi(Number(page), Number(limit));
+		const allowedJenjangIds = (req as any).allowedJenjangIds;
+		const result = await prestasiService.ambilSemuaPrestasi(
+			Number(page),
+			Number(limit),
+			allowedJenjangIds
+		);
 		res.status(200).json({
 			message: "Prestasi berhasil diambil",
 			...result,

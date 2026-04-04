@@ -14,12 +14,22 @@ import {
 	validasiHapusKegiatan,
 } from "./activities.validator";
 import authenticateJWT from "../../shared/middlewares/jwtVerification";
-// import csrfProtection from "../middlewares/csrfProtection";
+import { filterCarouselByRole } from "../../shared/middlewares/carousel/permission.middleware";
 
 const router = express.Router();
 
 router.get(
 	"/",
+	(req, res, next) => {
+		const authHeader = req.headers.authorization;
+		if (authHeader && authHeader.startsWith("Bearer ")) {
+			return authenticateJWT(req, res, (err) => {
+				if (err) return next();
+				filterCarouselByRole(req, res, next);
+			});
+		}
+		next();
+	},
 	ambilSemuaKegiatan
 	/**
 	 * #swagger

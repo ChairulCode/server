@@ -46,8 +46,7 @@ export const validasiBuatPengumuman = [
 
 	// 4. Prioritas (ENUM): Wajib diisi dan harus sesuai nilai ENUM
 	body("prioritas")
-		.notEmpty()
-		.withMessage("Prioritas wajib diisi.")
+		.optional({ nullable: true })
 		.isIn(["high", "medium", "low"])
 		.withMessage("Prioritas tidak valid. Pilih salah satu: high, medium, atau low."),
 

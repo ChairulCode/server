@@ -15,13 +15,23 @@ import {
 	validasiHapusPrestasi,
 	validasiGetPrestasi,
 } from "./achievements.validator";
-// import csrfProtection from "../middlewares/csrfProtection";
+import { filterCarouselByRole } from "../../shared/middlewares/carousel/permission.middleware";
 
 const router = express.Router();
 
 // api/v1/prestasi
 router.get(
 	"/",
+	(req, res, next) => {
+		const authHeader = req.headers.authorization;
+		if (authHeader && authHeader.startsWith("Bearer ")) {
+			return authenticateJWT(req, res, (err) => {
+				if (err) return next();
+				filterCarouselByRole(req, res, next); // reuse middleware carousel
+			});
+		}
+		next();
+	},
 	ambilSemuaPrestasi
 	/**
 	 * #swagger

@@ -16,7 +16,12 @@ export const buatKegiatan = async (req: Request, res: Response) => {
 export const ambilSemuaKegiatan = async (req: Request, res: Response) => {
 	const { page = "1", limit = "20" } = req.query;
 	try {
-		const result = await kegiatanService.ambilSemuaKegiatan(Number(page), Number(limit));
+		const allowedJenjangIds = (req as any).allowedJenjangIds;
+		const result = await kegiatanService.ambilSemuaKegiatan(
+			Number(page),
+			Number(limit),
+			allowedJenjangIds
+		);
 		res.status(200).json({
 			message: "Kegiatan berhasil diambil",
 			...result,

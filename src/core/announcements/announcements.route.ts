@@ -14,8 +14,24 @@ import {
 	validasiHapusPengumuman,
 } from "./announcements.validator";
 import authenticateJWT from "../../shared/middlewares/jwtVerification";
+import { filterCarouselByRole } from "../../shared/middlewares/carousel/permission.middleware";
 
 const router = express.Router();
+
+router.get(
+	"/",
+	(req, res, next) => {
+		const authHeader = req.headers.authorization;
+		if (authHeader && authHeader.startsWith("Bearer ")) {
+			return authenticateJWT(req, res, (err) => {
+				if (err) return next();
+				filterCarouselByRole(req, res, next);
+			});
+		}
+		next();
+	},
+	ambilSemuaPengumuman
+);
 
 router.get(
 	"/",

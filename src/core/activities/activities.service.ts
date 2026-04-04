@@ -46,30 +46,42 @@ const buatKegiatan = async (data: any) => {
 	}
 };
 
-const ambilSemuaKegiatan = async (page: number, limit: number) => {
+const ambilSemuaKegiatan = async (
+	page: number,
+	limit: number,
+	allowedJenjangIds?: string[] // ✅ Tambah ini
+) => {
 	try {
+		const whereClause =
+			allowedJenjangIds && allowedJenjangIds.length > 0
+				? {
+						jenjang_relasi: {
+							some: {
+								jenjang_id: { in: allowedJenjangIds },
+							},
+						},
+					}
+				: {};
+
 		const [result, total] = await Promise.all([
 			db.kegiatan.findMany({
+				where: whereClause, // ✅
 				take: limit,
 				skip: (page - 1) * limit,
 				orderBy: { tanggal_publikasi: "desc" },
 				include: {
 					jenjang_relasi: {
-						include: {
-							jenjang: true,
-						},
+						include: { jenjang: true },
 					},
 				},
 			}),
-			db.kegiatan.count(),
+			db.kegiatan.count({ where: whereClause }), // ✅
 		]);
-
-		const totalPages = Math.ceil(total / limit);
 
 		return {
 			metadata: {
 				totalItems: total,
-				totalPages: totalPages,
+				totalPages: Math.ceil(total / limit),
 				currentPage: page,
 				limit: limit,
 			},

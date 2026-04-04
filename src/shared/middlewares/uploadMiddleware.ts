@@ -31,7 +31,7 @@ const dynamicStorage = multer.diskStorage({
 
 export const uploadDynamic = multer({
 	storage: dynamicStorage,
-	limits: { fileSize: 10 * 1024 * 1024 },
+	limits: { fileSize: 25 * 1024 * 1024 },
 	fileFilter: (req, file, cb) => {
 		const allowedTypes = /jpeg|jpg|png|gif|webp|svg/;
 		const extOk = allowedTypes.test(path.extname(file.originalname).toLowerCase());

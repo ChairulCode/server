@@ -46,30 +46,39 @@ const buatPrestasi = async (data: any) => {
 	}
 };
 
-const ambilSemuaPrestasi = async (page: number, limit: number) => {
+const ambilSemuaPrestasi = async (page: number, limit: number, allowedJenjangIds?: string[]) => {
 	try {
+		// ✅ Buat whereClause berdasarkan jenjang
+		const whereClause =
+			allowedJenjangIds && allowedJenjangIds.length > 0
+				? {
+						jenjang_relasi: {
+							some: {
+								jenjang_id: { in: allowedJenjangIds },
+							},
+						},
+					}
+				: {}; // superadmin → tidak ada filter → ambil semua
+
 		const [result, total] = await Promise.all([
 			db.prestasi.findMany({
+				where: whereClause,
 				take: limit,
 				skip: (page - 1) * limit,
 				orderBy: { tanggal_publikasi: "desc" },
 				include: {
 					jenjang_relasi: {
-						include: {
-							jenjang: true,
-						},
+						include: { jenjang: true },
 					},
 				},
 			}),
-			db.prestasi.count(),
+			db.prestasi.count({ where: whereClause }),
 		]);
-
-		const totalPages = Math.ceil(total / limit);
 
 		return {
 			metadata: {
 				totalItems: total,
-				totalPages: totalPages,
+				totalPages: Math.ceil(total / limit),
 				currentPage: page,
 				limit: limit,
 			},

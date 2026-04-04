@@ -11,7 +11,7 @@ const validasiIdCarouselParam = [
 		.withMessage("ID Carousel wajib disertakan di parameter.")
 		.isUUID(4)
 		.withMessage("ID Carousel harus berupa UUID v4 yang valid."),
-	checkValidationResult, 
+	checkValidationResult,
 ];
 
 // ====================================================
@@ -32,6 +32,7 @@ export const validasiBuatCarousel = [
 	body("urutan")
 		.notEmpty()
 		.withMessage("Urutan wajib diisi.")
+		.optional({ checkFalsy: true })
 		.isInt({ min: 1 })
 		.withMessage("Urutan harus berupa angka integer positif.")
 		.toInt(),

@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
-  // url        = env("DATABASE_URL")
+  url        = env("DATABASE_URL")
   extensions = [uuidOssp(map: "uuid-ossp")]
 }
 
@@ -278,7 +278,7 @@ model galleries {
 model carousel {
   carousel_id       String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   judul             String    @db.VarChar(255)
-  urutan            Int       @unique
+  urutan            Int       
   konten            String    @db.Text
   path_gambar       String    @db.VarChar(255)
   tanggal_publikasi DateTime  @db.Timestamp(3)
@@ -289,6 +289,7 @@ model carousel {
   jenjang_id        String?   @db.Uuid
   penulis_user_id   String    @db.Uuid
   editor_user_id    String?   @db.Uuid
+  @@unique([jenjang_id, urutan], map: "carousel_jenjang_urutan_unique")
 
   jenjang jenjang? @relation(fields: [jenjang_id], references: [jenjang_id], onDelete: SetNull, onUpdate: Cascade, map: "carousel_jenjang_id_fkey")
   penulis users    @relation("CarouselPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade, map: "carousel_penulis_fkey")

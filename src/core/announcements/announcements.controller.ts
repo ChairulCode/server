@@ -12,21 +12,19 @@ export const buatPengumuman = async (req: Request, res: Response) => {
 		});
 	}
 };
-
 export const ambilSemuaPengumuman = async (req: Request, res: Response) => {
 	const { page = "1", limit = "20" } = req.query;
-
 	try {
-		const result = await pengumumanService.ambilSemuaPengumuman(Number(page), Number(limit));
-		res.status(200).json({
-			message: "Pengumuman berhasil diambil",
-			...result,
-		});
+		const allowedJenjangIds = (req as any).allowedJenjangIds; // ✅
+
+		const result = await pengumumanService.ambilSemuaPengumuman(
+			Number(page),
+			Number(limit),
+			allowedJenjangIds // ✅
+		);
+		res.status(200).json({ message: "Pengumuman berhasil diambil", ...result });
 	} catch (error) {
-		res.status(500).json({
-			message: "Server Error",
-			serverMessage: error,
-		});
+		res.status(500).json({ message: "Server Error", serverMessage: error });
 	}
 };
 
@@ -105,23 +103,18 @@ export const editPengumumanSebagian = async (req: Request, res: Response) => {
 export const hapusPengumuman = async (req: Request, res: Response) => {
 	const { pengumuman_id } = req.params;
 	try {
-		const cariPengumuman = await pengumumanService.ambilDetailPengumuman(req.params.Pengumuman_id);
+		const cariPengumuman = await pengumumanService.ambilDetailPengumuman(pengumuman_id); // ✅ fix typo
 		if (!cariPengumuman) {
 			return res.status(404).json({
 				message: "Pengumuman tidak ditemukan, Gagal melakukan penghapusan data",
 				data: null,
 			});
 		}
-
 		const result = await pengumumanService.hapusPengumuman(pengumuman_id);
-		res.status(200).json({
-			message: `Pengumuman dengan id ${pengumuman_id} berhasil dihapus`,
-			data: result,
-		});
+		res
+			.status(200)
+			.json({ message: `Pengumuman dengan id ${pengumuman_id} berhasil dihapus`, data: result });
 	} catch (error) {
-		res.status(500).json({
-			message: "Server Error",
-			serverMessage: error,
-		});
+		res.status(500).json({ message: "Server Error", serverMessage: error });
 	}
 };

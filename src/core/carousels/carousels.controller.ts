@@ -1,10 +1,21 @@
 import { Request, Response } from "express";
 import carouselService from "./carousels.service";
 
-export const buatCarousel = async (req: Request, res: Response) => {
+export const ambilCarouselPublik = async (req: Request, res: Response) => {
+	// Query param opsional: ?jenjang=SMA | SMP | SD | PGTK
+	const { jenjang } = req.query;
+	console.log("------------------------------------------");
+	console.log("DEBUG CAROUSEL PUBLIK:");
+	console.log("Query Jenjang dari Frontend:", jenjang);
+	console.log("------------------------------------------");
+
 	try {
-		const result = await carouselService.buatCarousel(req.body);
-		res.status(201).json({ message: "Carousel berhasil dibuat", data: result });
+		const result = await carouselService.ambilCarouselPublik(jenjang as string | undefined);
+
+		res.status(200).json({
+			message: "Carousel publik berhasil diambil",
+			...result,
+		});
 	} catch (error) {
 		res.status(500).json({
 			message: "Server Error",
@@ -13,20 +24,58 @@ export const buatCarousel = async (req: Request, res: Response) => {
 	}
 };
 
+export const buatCarousel = async (req: Request, res: Response) => {
+	try {
+		const payload = req.body;
+
+		// ✅ PERBAIKAN: Middleware checkCarouselPermission sudah handle semua validasi:
+		// - Auto-assign jenjang_id untuk admin jenjang (line 47-62 di permission_middleware.ts)
+		// - Validasi permission berdasarkan role
+		// Controller tinggal create saja, tidak perlu validasi ulang
+
+		const result = await carouselService.buatCarousel(payload);
+		res.status(201).json({
+			message: "Carousel berhasil ditambahkan",
+			data: result,
+		});
+	} catch (error: any) {
+		console.error("Error in buatCarousel:", error);
+
+		// Handle error limit 10 carousel
+		if (error.message && error.message.includes("Batas maksimal")) {
+			return res.status(400).json({
+				message: error.message,
+			});
+		}
+
+		res.status(500).json({
+			message: "Server Error",
+			serverMessage: error.message || error,
+		});
+	}
+};
+
 export const ambilSemuaCarousel = async (req: Request, res: Response) => {
 	const { page = "1", limit = "20" } = req.query;
 
+	// Ambil data dari middleware
+	const userRole = (req as any).user?.userInfo?.role || "";
+	const allowedJenjangIds = (req as any).allowedJenjangIds;
+
 	try {
-		const result = await carouselService.ambilSemuaCarousel(Number(page), Number(limit));
+		const result = await carouselService.ambilSemuaCarousel(
+			Number(page),
+			Number(limit),
+			userRole,
+			allowedJenjangIds
+		);
+
 		res.status(200).json({
-			message: "Carousel berhasil diambil",
+			message: "Data carousel berhasil diambil",
 			...result,
 		});
 	} catch (error) {
-		res.status(500).json({
-			message: "Server Error",
-			serverMessage: error,
-		});
+		res.status(500).json({ message: "Server Error", serverMessage: error });
 	}
 };
 
