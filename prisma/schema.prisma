@@ -132,6 +132,8 @@ model users {
   kelulusanEditor    kelulusan[]      @relation("KelulusanEditor")
   gradConfigPenulis  graduation_config[] @relation("GradConfigPenulis")
   gradConfigEditor   graduation_config[] @relation("GradConfigEditor")
+  about_penulis about[] @relation("AboutPenulis")
+  about_editor  about[] @relation("AboutEditor")
 
   @@index([role_id], map: "users_role_id_index")
 }
@@ -140,6 +142,7 @@ model jenjang {
   jenjang_id   String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   nama_jenjang String @unique(map: "jenjang_nama_jenjang_unique") @db.VarChar(50)
   kode_jenjang String @unique(map: "jenjang_kode_jenjang_unique") @db.VarChar(10)
+
 
   subjectGrades     subject_grades[]
   Kelulusan         kelulusan[]
@@ -151,6 +154,7 @@ model jenjang {
   prestasiJenjangs  prestasi_jenjang[]
   kegiatanJenjangs  kegiatan_jenjang[]
   pengumumanJenjangs pengumuman_jenjang[]
+  about about[]
 }
 
 model prestasi {
@@ -609,4 +613,50 @@ model ekskul_gambar {
   ekstrakurikuler ekstrakurikuler @relation(fields: [ekskul_id], references: [ekskul_id], onDelete: Cascade)
 
   @@index([ekskul_id])
+}
+
+model about {
+  about_id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  
+  // Hero Section
+  hero_badge        String?   @db.VarChar(100)
+  hero_title        String    @db.VarChar(255)
+  hero_subtitle     String?   @db.Text
+  hero_image        String?   @db.VarChar(255)
+  hero_meta_pills   Json?     // Array of pills: ["Terakreditasi A", "ISO 9001"]
+  
+  // Description Section
+  description_text  String?   @db.Text
+  
+  // Visi Section
+  visi_quote        String?   @db.Text
+  
+  // Keunggulan (highlights) - JSON array
+  highlights        Json?     // [{icon: "🎓", label: "Tenaga Pengajar Berpengalaman"}, ...]
+  
+  // Fasilitas - JSON array (bisa diambil dari tabel fasilitas juga)
+  fasilitas_items   Json?     // [{icon: "🏫", nama: "Ruang Kelas Ber-AC"}, ...]
+  
+  // CTA Section
+  cta_title         String?   @db.VarChar(255)
+  cta_description   String?   @db.Text
+  cta_button_text   String?   @db.VarChar(100)
+  cta_button_url    String?   @db.VarChar(255)
+  
+  // Meta
+  is_published      Boolean?  @default(true)
+  jenjang_id        String?   @db.Uuid
+  created_at        DateTime? @default(now()) @db.Timestamp(3)
+  updated_at        DateTime  @default(now()) @updatedAt @db.Timestamp(3)
+  penulis_user_id   String    @db.Uuid
+  editor_user_id    String?   @db.Uuid
+  
+  jenjang jenjang? @relation(fields: [jenjang_id], references: [jenjang_id], onDelete: SetNull, onUpdate: Cascade, map: "about_jenjang_id_fkey")
+  penulis users    @relation("AboutPenulis", fields: [penulis_user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade, map: "about_penulis_fkey")
+  editor  users?   @relation("AboutEditor", fields: [editor_user_id], references: [user_id], onDelete: SetNull, onUpdate: Cascade, map: "about_editor_fkey")
+  
+  @@index([jenjang_id], map: "about_jenjang_id_index")
+  @@index([penulis_user_id], map: "about_penulis_user_id_index")
+  @@index([editor_user_id], map: "about_editor_user_id_index")
+  @@unique([jenjang_id], map: "about_jenjang_unique")
 }
