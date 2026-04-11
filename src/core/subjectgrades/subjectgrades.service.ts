@@ -33,12 +33,12 @@ const ambilSemuaSubjectGrades = async (
 
 		if (search) {
 			whereClause.OR = [
-				{ tahun_ajaran: { contains: search, mode: "insensitive" } },
-				{ semester: { contains: search, mode: "insensitive" } },
-				{ nama_siswa: { contains: search, mode: "insensitive" } },
+				{ tahun_ajaran: { contains: search } },
+				{ semester: { contains: search } },
+				{ nama_siswa: { contains: search } },
 				{
 					jenjang: {
-						nama_jenjang: { contains: search, mode: "insensitive" },
+						nama_jenjang: { contains: search },
 					},
 				},
 			];
@@ -173,7 +173,7 @@ const cekNilaiSiswaPublik = async (
 		const siswa = await db.siswa.findFirst({
 			where: {
 				nisn: nisn,
-				kelas: { contains: kelas, mode: "insensitive" },
+				kelas: { contains: kelas },
 			},
 		});
 

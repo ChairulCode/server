@@ -140,9 +140,24 @@ export class PendaftaranService {
 
 		if (filters?.search) {
 			where.OR = [
-				{ namaSiswa: { contains: filters.search, mode: "insensitive" } },
-				{ noPendaftaran: { contains: filters.search, mode: "insensitive" } },
-				{ emailOrangtua: { contains: filters.search, mode: "insensitive" } },
+				{
+					namaSiswa: {
+						contains: filters.search,
+						//  mode: "insensitive"
+					},
+				},
+				{
+					noPendaftaran: {
+						contains: filters.search,
+						//  mode: "insensitive"
+					},
+				},
+				{
+					emailOrangtua: {
+						contains: filters.search,
+						//  mode: "insensitive"
+					},
+				},
 			];
 		}
 

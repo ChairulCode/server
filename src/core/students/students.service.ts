@@ -48,10 +48,10 @@ export class SiswaService {
 
 		const where: Prisma.SiswaWhereInput = {
 			...(nama && {
-				nama: { contains: nama, mode: "insensitive" },
+				nama: { contains: nama },
 			}),
 			...(nisn && { nisn: { contains: nisn } }),
-			...(kelas && { kelas: { contains: kelas, mode: "insensitive" } }),
+			...(kelas && { kelas: { contains: kelas } }),
 			...(jenisKelamin && { jenisKelamin }),
 			...(status && { status }),
 		};

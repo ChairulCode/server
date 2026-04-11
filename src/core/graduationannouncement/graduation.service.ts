@@ -28,9 +28,26 @@ const ambilSemuaKelulusan = async (
 
 	if (search) {
 		where.OR = [
-			{ nama_siswa: { contains: search, mode: "insensitive" } },
-			{ nomor_siswa: { contains: search, mode: "insensitive" } },
-			{ jenjang: { nama_jenjang: { contains: search, mode: "insensitive" } } },
+			{
+				nama_siswa: {
+					contains: search,
+					// mode: "insensitive"
+				},
+			},
+			{
+				nomor_siswa: {
+					contains: search,
+					// mode: "insensitive"
+				},
+			},
+			{
+				jenjang: {
+					nama_jenjang: {
+						contains: search,
+						// mode: "insensitive"
+					},
+				},
+			},
 		];
 	}
 

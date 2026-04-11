@@ -30,10 +30,7 @@ const ambilCarouselPublik = async (kode_jenjang?: string) => {
 		if (kode_jenjang) {
 			const jenjang = await db.jenjang.findFirst({
 				where: {
-					kode_jenjang: {
-						equals: kode_jenjang.toUpperCase(),
-						mode: "insensitive",
-					},
+					kode_jenjang: kode_jenjang.toUpperCase(),
 				},
 			});
 

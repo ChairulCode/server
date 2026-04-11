@@ -32,7 +32,7 @@ const ambilAboutPublik = async (kode_jenjang?: string) => {
 				where: {
 					kode_jenjang: {
 						equals: kode_jenjang.toUpperCase(),
-						mode: "insensitive",
+						// mode: "insensitive",
 					},
 				},
 			});
