@@ -14,6 +14,7 @@ import {
 	hapusRole,
 	lihatSemuaPermissionRole,
 	updatePermissionRole,
+	lihatMyPermissions,
 } from "./users.controller";
 
 const router = express.Router();
@@ -36,7 +37,8 @@ router.get(
 	 * #swagger.security = [{ "BearerAuth": [] }]
 	 */
 );
-
+// MY PERMISSIONS
+router.get("/permissions/my-permissions", lihatMyPermissions);
 // 1.2. BUAT USER BARU
 router.post(
 	"/",

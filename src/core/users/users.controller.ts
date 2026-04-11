@@ -232,6 +232,41 @@ const updatePermissionRole = async (req: Request, res: Response) => {
 	}
 };
 
+// ==========================================================
+// MY PERMISSIONS — Ambil permission berdasarkan token user
+// ==========================================================
+export const lihatMyPermissions = async (req: Request, res: Response) => {
+	try {
+		const user = (req as any).user;
+		const user_id = user?.userInfo?.user_id || user?.user_id;
+
+		if (!user_id) {
+			return res.status(401).json({ message: "Unauthorized" });
+		}
+
+		const userData = await UserService.lihatSingleUser(user_id);
+
+		if (!userData) {
+			return res.status(404).json({ message: "User tidak ditemukan." });
+		}
+
+		const permissions =
+			(userData as any).role?.role_permission?.map((rp: any) => rp.permission?.nama_permission) ??
+			[];
+
+		return res.status(200).json({
+			message: "Permission berhasil diambil.",
+			data: {
+				user_id,
+				role: (userData as any).role?.nama_role,
+				permissions,
+			},
+		});
+	} catch (err) {
+		handleServiceError(res, err);
+	}
+};
+
 export {
 	buatUserBaru,
 	lihatSemuaUser,

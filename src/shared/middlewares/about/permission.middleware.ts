@@ -124,8 +124,8 @@ async function checkJenjangAccess(role: string, jenjang_id: string): Promise<boo
 		if (roleUpper.includes("SD") && !namaJenjang.includes("SMP") && namaJenjang.includes("SD"))
 			return true;
 		if (
-			(roleUpper.includes("PGTK") || roleUpper.includes("TK")) &&
-			(namaJenjang.includes("PGTK") || namaJenjang.includes("TK"))
+			(roleUpper.includes("PG-TK") || roleUpper.includes("TK")) &&
+			(namaJenjang.includes("PG-TK") || namaJenjang.includes("TK"))
 		)
 			return true;
 
@@ -187,8 +187,8 @@ async function getJenjangIdsByRole(role: string): Promise<string[]> {
 			) {
 				allowedJenjangIds.push(jenjang.jenjang_id);
 			} else if (
-				(roleUpper.includes("PGTK") || roleUpper.includes("TK")) &&
-				(namaJenjang.includes("PGTK") || namaJenjang.includes("TK"))
+				(roleUpper.includes("PG-TK") || roleUpper.includes("TK")) &&
+				(namaJenjang.includes("PG-TK") || namaJenjang.includes("TK"))
 			) {
 				allowedJenjangIds.push(jenjang.jenjang_id);
 			}

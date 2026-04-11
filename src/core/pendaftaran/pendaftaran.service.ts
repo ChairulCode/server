@@ -233,7 +233,7 @@ export class PendaftaranService {
 			"Kepala Sekolah SMA": ["SMA"],
 			"Kepala Sekolah SMP": ["SMP"],
 			"Kepala Sekolah SD": ["SD"],
-			"Kepala Sekolah PGTK": ["PG", "TK"],
+			"Kepala Sekolah PG-TK": ["PG", "TK"],
 		};
 
 		const prefixes = role ? (ROLE_KELAS_PREFIX[role] ?? []) : [];
