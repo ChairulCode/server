@@ -10,12 +10,8 @@ if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");
 if (!RESET_SECRET) throw new Error("RESET_SECRET is not defined");
 
 const getErrorMessage = (error: unknown): string => {
-	if (error instanceof Error) {
-		return error.message;
-	}
-	if (typeof error === "string") {
-		return error;
-	}
+	if (error instanceof Error) return error.message;
+	if (typeof error === "string") return error;
 	console.error("Unknown error caught in authService:", error);
 	return "Terjadi kesalahan yang tidak diketahui.";
 };
@@ -27,15 +23,13 @@ const login = async ({ email, password }: { email: string; password: string }) =
 			include: { role: true },
 		});
 
-		if (!user) {
-			throw new Error("Email tidak ditemukan");
-		}
+		if (!user) throw new Error("Email tidak ditemukan");
 
 		const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 		if (!isPasswordValid) throw new Error("Password salah.");
 
 		await db.users.update({
-			where: { user_id: user?.user_id },
+			where: { user_id: user.user_id },
 			data: { login_terakhir: new Date().toISOString() },
 		});
 
@@ -70,8 +64,7 @@ const login = async ({ email, password }: { email: string; password: string }) =
 			},
 		};
 	} catch (error) {
-		const errorMessage = getErrorMessage(error);
-		throw new Error(errorMessage);
+		throw new Error(getErrorMessage(error));
 	}
 };
 
@@ -99,33 +92,29 @@ const register = async (data: {
 		return newUser;
 	} catch (error) {
 		const errorMessage = getErrorMessage(error);
-
 		if (errorMessage.includes("P2002")) {
 			throw new Error("Email atau username sudah digunakan.");
 		}
-
 		throw new Error(errorMessage);
 	}
 };
 
+// ✅ FIX: return { found } flag agar controller bisa bedakan email ada/tidak
 const forgotPassword = async (email: string) => {
 	try {
-		const user = await db.users.findUnique({ where: { email: email } });
+		const user = await db.users.findUnique({ where: { email } });
 
 		if (!user) {
-			console.log(
-				`Email ${email} tidak ditemukan, tapi kita tetap bilang berhasil untuk keamanan.`
-			);
-			return {
-				message: "Jika email terdaftar, link reset password akan dikirimkan.",
-			};
+			return { found: false };
 		}
 
 		const resetToken = jwt.sign({ user_id: user.user_id }, RESET_SECRET, { expiresIn: "10m" });
-		return await sendResetEmail(email, resetToken);
+
+		await sendResetEmail(email, resetToken);
+
+		return { found: true };
 	} catch (error) {
-		const errorMessage = getErrorMessage(error);
-		throw new Error(errorMessage);
+		throw new Error(getErrorMessage(error));
 	}
 };
 
@@ -149,9 +138,7 @@ const resetPassword = async (token: string, newPassword: string) => {
 		select: { user_id: true, email: true },
 	});
 
-	if (!updatedUser) {
-		throw new Error("Gagal mengupdate password.");
-	}
+	if (!updatedUser) throw new Error("Gagal mengupdate password.");
 
 	return { message: "Password berhasil direset.", user: updatedUser };
 };

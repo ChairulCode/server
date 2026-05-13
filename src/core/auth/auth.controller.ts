@@ -2,12 +2,8 @@ import { Request, Response } from "express";
 import authService from "./auth.service";
 
 const getErrorMessage = (error: unknown): string => {
-	if (error instanceof Error) {
-		return error.message;
-	}
-	if (typeof error === "string") {
-		return error;
-	}
+	if (error instanceof Error) return error.message;
+	if (typeof error === "string") return error;
 	return "Terjadi kesalahan yang tidak diketahui.";
 };
 
@@ -28,30 +24,38 @@ export const register = async (req: Request, res: Response) => {
 		res.status(201).json({ message: "Registrasi berhasil", data: newUser });
 	} catch (error) {
 		const errorMessage = getErrorMessage(error);
-		const status = errorMessage.includes("terdaftar") ? 409 : 500; // 409 Conflict
+		const status = errorMessage.includes("terdaftar") ? 409 : 500;
 		res.status(status).json({ message: "Gagal Registrasi", serverMessage: errorMessage });
 	}
 };
 
+// ✅ FIX UTAMA: tambah res.json() + bedakan 404 vs 200
 export const forgotPassword = async (req: Request, res: Response) => {
 	try {
 		const { email } = req.body;
-		await authService.forgotPassword(email);
+		const result = await authService.forgotPassword(email);
+
+		if (!result.found) {
+			return res.status(404).json({
+				message: "Email tidak terdaftar dalam sistem.",
+			});
+		}
+
+		return res.status(200).json({
+			message: "Link reset password telah dikirim ke email Anda.",
+		});
 	} catch (error) {
 		const errorMessage = getErrorMessage(error);
-		res
-			.status(500)
-			.json({ message: "Gagal memproses permintaan reset", serverMessage: errorMessage });
+		return res.status(500).json({
+			message: "Gagal memproses permintaan reset",
+			serverMessage: errorMessage,
+		});
 	}
 };
 
-// DI FILE auth.controller.ts
 export const resetPassword = async (req: Request, res: Response) => {
 	try {
-		// Ambil token dari query string (?token=...)
 		const { token } = req.query;
-
-		// Pastikan token ada dan berbentuk string tunggal
 		const tokenString = typeof token === "string" ? token : "";
 
 		if (!tokenString) {
@@ -59,8 +63,6 @@ export const resetPassword = async (req: Request, res: Response) => {
 		}
 
 		const { password } = req.body;
-
-		// Kirim tokenString ke service
 		const result = await authService.resetPassword(tokenString, password);
 		res.status(200).json({ message: result.message });
 	} catch (error) {

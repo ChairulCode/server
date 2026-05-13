@@ -15,9 +15,8 @@ const validasiIdSocialMediaParam = [
 	param("social_media_id")
 		.exists()
 		.withMessage("ID Social Media wajib disertakan.")
-		.isUUID(4)
-		.withMessage("ID Social Media harus berupa UUID v4 yang valid."),
-	checkValidationResult,
+		.isUUID() // ← hapus angka "4"
+		.withMessage("ID Social Media harus berupa UUID yang valid."),
 ];
 
 /* ====================================================
